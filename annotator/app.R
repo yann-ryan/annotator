@@ -71,11 +71,15 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
     
+    # Authorise the Google API using your .json file.
+    
     observeEvent(input$load,{
         
         googlesheets4::gs4_auth(path = input$json_auth$datapath)
         
     })
+    
+    # Put the sheet key provided into a reactive variable
     
     sheet_key = eventReactive(input$load,{
         
@@ -83,20 +87,29 @@ server <- function(input, output, session) {
         
     })
     
+    # Load the sheet using the sheet key provided.
+    
     sheet = eventReactive(input$load,{
         
-        read_sheet(input$sheet_key, col_names = F)
+        read_sheet(sheet_key(), col_names = F)
         
     })
     
-    plagueletters = reactive({
+    # Load the data to be labelled, from the provided .csv.
+    
+    data_to_label = reactive({
         
         read_csv(input$data_file$datapath)
     })
     
     
     
+    # Create a 'counter' variable with a value of 1. Changing this will navigate through the data.
+    
     counter <- reactiveValues(countervalue = 1)
+    
+    
+    # Create a set of observe events which will increase or decrease the counter value, depending on an action taken. 
     
     observeEvent(input$previous,{
         
@@ -113,11 +126,8 @@ server <- function(input, output, session) {
         counter$countervalue <- as.numeric(input$skipto)
     })
     
-    split_years = reactive({ 
-        a = str_split(y$component[counter$countervalue], "<p>")
-        
-        str_extract_all(a[[1]][2], "(?<=Correspondence period:) (.*?)(?=<br>)")
-    })
+
+    # This last one changes the counter value to the value clicked on in the GUI.
     
     observeEvent(input$click,{
         
@@ -126,6 +136,8 @@ server <- function(input, output, session) {
         counter$countervalue <- row_to_click 
     })
     
+    
+    # Print the relevant text from the current data row in the main portion of the screen.
     
     output$current_selection = renderUI({
         print(counter$countervalue)
@@ -140,12 +152,12 @@ server <- function(input, output, session) {
           em("Matches correct (if only some correct):"),br(fields[4]))
     })
     
-    
+    # Create a a a series of Observe events which will write the relevant data to Google sheets, and also increase the counter value by one, depending on a decision button clicked.
     
     observeEvent(input$yes, {
         
         
-        data = tibble(plagueletters()$key[counter$countervalue],'yes', input$places, input$text)
+        data = tibble(data_to_label()$key[counter$countervalue],'yes', input$places, input$text)
         range_write(sheet_key(), data, sheet = 1, range = paste0("A", counter$countervalue), col_names = F)
         counter$countervalue <- counter$countervalue + 1
     })
@@ -153,7 +165,7 @@ server <- function(input, output, session) {
     observeEvent(input$no, {
         
         
-        data = tibble(plagueletters()$key[counter$countervalue], 'no',input$places, input$text)
+        data = tibble(data_to_label()$key[counter$countervalue], 'no',input$places, input$text)
         range_write(sheet_key(), data, sheet = 1, range = paste0("A", counter$countervalue), col_names = F)
         counter$countervalue <- counter$countervalue + 1
     })
@@ -161,7 +173,7 @@ server <- function(input, output, session) {
     observeEvent(input$maybe, {
         
         matches_correct = paste(input$checkbox,collapse=";")
-        data = tibble(plagueletters()$key[counter$countervalue],'maybe',input$places, input$text, matches_correct)
+        data = tibble(data_to_label()$key[counter$countervalue],'maybe',input$places, input$text, matches_correct)
         range_write(sheet_key(), data, sheet = 1, range = paste0("A", counter$countervalue), col_names = F)
         counter$countervalue <- counter$countervalue + 1
     })
@@ -169,14 +181,14 @@ server <- function(input, output, session) {
     observeEvent(input$just_notes, {
         
         
-        data = tibble(plagueletters()$key[counter$countervalue], 'just_notes', input$places,input$text)
+        data = tibble(data_to_label()$key[counter$countervalue], 'just_notes', input$places,input$text)
         range_write(sheet_key(), data, sheet = 1, range = paste0("A", counter$countervalue), col_names = F)
         updateTextInput(session,"text", "Notes Field:", value=NULL)
     })
     
     
 
-    
+    # Create the data needed for the progress grid. 
     
     data = eventReactive(c(input$yes,input$no, input$previous, input$nextone),{
         
@@ -194,7 +206,7 @@ server <- function(input, output, session) {
         
         
         x <- LETTERS[1:20]
-        y <- paste0("var", seq(1,(nrow(plagueletters())/20)))
+        y <- paste0("var", seq(1,(nrow(data_to_label())/20)))
         data <- expand.grid(X=x, Y=y)
         data = data %>% mutate(row_id = 1:nrow(.))
         
@@ -203,6 +215,9 @@ server <- function(input, output, session) {
                           select(row_id, done), by = 'row_id') %>% 
             mutate(done = ifelse(is.na(done), 'no', done))
     })
+    
+    # Draw the progress grid, updated any time there's a change in the data.
+    
     output$progress = renderPlot({
         
         p =  ggplot(data(), aes(X, Y, fill= done, text = row_id)) + 
@@ -215,10 +230,12 @@ server <- function(input, output, session) {
     })
     
     
+    # Print the first 100 characters of a row underneath the progress grid, when hovered over.
+    
     output$vals <- renderPrint({
         hover <- input$hover 
         y <- nearPoints(data(), input$hover, maxpoints = 1) %>% pull(row_id)
-        z = plagueletters() %>% slice(y) %>% pull(abstract)
+        z = data_to_label() %>% slice(y) %>% pull(abstract)  %>% substr(1,100)
         HTML(paste0("<br><b>ROW: ", z, "</b>"))
     }) 
     

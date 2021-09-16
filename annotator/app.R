@@ -53,6 +53,7 @@ ui <- fluidPage(
         ),
         
         # Show a plot of the generated distribution
+        
         mainPanel(fluidRow(column(6,h3("Letter Details:"),
                                   htmlOutput("the_component"),
                                   uiOutput('component_number'),

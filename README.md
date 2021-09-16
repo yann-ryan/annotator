@@ -52,7 +52,7 @@ When you first open the annotator, you'll see a lot of red error text. This is b
 
 #### Getting an API key from Google
 
-The trickiest bit now is authorising your copy of the application to read and write from a Google sheet on your account. For this you'll need a Google Cloud Platform account.
+The trickiest bit now is authorising your copy of the application to read and write from a Google sheet on your account. For this you'll need a Google Cloud Platform account and a service account token, in the form of a json file. 
 
 There are very good instructions on how to do this here: <https://gargle.r-lib.org/articles/get-api-credentials.html>
 
@@ -67,14 +67,19 @@ You can close this pop-up.
 #### Creating and downloading the .json file.
 From https://gargle.r-lib.org/articles/get-api-credentials.html:
 
-From the Developers Console, in the target GCP Project, go to IAM & Admin > Service accounts.
-Give it a decent name and description.
-For example, the service account used to create the googledrive docs has name “googledrive-docs” and description “Used when generating googledrive documentation”.
-Service account permissions. Whether you need to do anything here depends on the API(s) you are targetting. You can also modify roles later and iteratively sort this out.
-For example, the service account used to create the googledrive docs does not have any explicit roles.
-The service account used to test bigrquery has roles BigQuery Admin and Storage Admin.
-Grant users access to this service account? So far, I have not done this, so feel free to do nothing here. Or if you know this is useful to you, then by all means do so.
-Do Create key and download as JSON. This file is what we mean when we talk about a “service account token” in the documentation of gargle and packages that use gargle. gargle::credentials_service_account() expects the path to this file.
+From the Cloud Console, with the correct project selected, got to IAM & Admin-> Service Accounts. 
+
+Do 'Create Service Account, and give it a name and description. 
+
+Grant the service account editor access to the project, using the *select a role* drop-down.
+
+Click on the newly-created service account, go to the 'keys' tab, and 'add key', specifying .json format. 
+
+Keep this key safe, like a username and password. 
+
+#### Upload the json file to the application.
+
+Using the first upload option.
 
 #### Upload a data file.
 

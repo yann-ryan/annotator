@@ -65,10 +65,16 @@ Create an API key. Navigate to APIs & Services \> Credentials. Click Create cred
 You can close this pop-up.
 
 #### Creating and downloading the .json file.
+From https://gargle.r-lib.org/articles/get-api-credentials.html:
 
-From the Developers Console, in the target GCP Project, go to APIs & Services \> Credentials. Do Create credentials \> OAuth client ID. Select Application type "Desktop app". You can capture the client ID and secret via clipboard right away. At any time, you can navigate to a particular client ID and click "Download JSON".
-
-Upload this file using the 'choose JSON file' prompt in the Annotator application.
+From the Developers Console, in the target GCP Project, go to IAM & Admin > Service accounts.
+Give it a decent name and description.
+For example, the service account used to create the googledrive docs has name “googledrive-docs” and description “Used when generating googledrive documentation”.
+Service account permissions. Whether you need to do anything here depends on the API(s) you are targetting. You can also modify roles later and iteratively sort this out.
+For example, the service account used to create the googledrive docs does not have any explicit roles.
+The service account used to test bigrquery has roles BigQuery Admin and Storage Admin.
+Grant users access to this service account? So far, I have not done this, so feel free to do nothing here. Or if you know this is useful to you, then by all means do so.
+Do Create key and download as JSON. This file is what we mean when we talk about a “service account token” in the documentation of gargle and packages that use gargle. gargle::credentials_service_account() expects the path to this file.
 
 #### Upload a data file.
 

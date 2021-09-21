@@ -1,0 +1,12 @@
+name: annotator
+title: annotator
+username:
+account: yannryan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4696669
+bundleId: 5055174
+url: https://yannryan.shinyapps.io/annotator/
+when: 1632215540.75978
+asMultiple: FALSE
+asStatic: FALSE

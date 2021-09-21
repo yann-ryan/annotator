@@ -13,7 +13,7 @@ library(tidyverse)
 library(shinyWidgets)
 library(htmltools)
 
-
+googlesheets4::gs4_deauth()
 
 
 ui <- fluidPage(
@@ -141,7 +141,8 @@ server <- function(input, output, session) {
     # Print the relevant text from the current data row in the main portion of the screen.
     
     output$current_selection = renderUI({
-        print(counter$countervalue)
+        req(input$json_auth, input$data_file, input$sheet_key)
+        
         fields = range_read(sheet_key(), sheet = 1, range = paste0("B", counter$countervalue, ":", "E", counter$countervalue), col_names = F) %>% 
             as.character()
         
@@ -153,7 +154,7 @@ server <- function(input, output, session) {
           em("Matches correct (if only some correct):"),br(fields[4]))
     })
     
-    # Create a a a series of Observe events which will write the relevant data to Google sheets, and also increase the counter value by one, depending on a decision button clicked.
+    # Create a series of Observe events which will write the relevant data to Google sheets, and also increase the counter value by one, depending on a decision button clicked.
     
     observeEvent(input$yes, {
         
@@ -195,7 +196,7 @@ server <- function(input, output, session) {
         
         
         
-        fields = read_sheet(input$sheet_key, sheet = 1, col_names = T) %>% 
+        fields = read_sheet(sheet_key(), sheet = 1, col_names = F) %>% 
             mutate(row_id = 1:nrow(.))
         
         colnames(fields) = c('key', 'decision', 'places', 'notes', 'row_id')
@@ -220,7 +221,7 @@ server <- function(input, output, session) {
     # Draw the progress grid, updated any time there's a change in the data.
     
     output$progress = renderPlot({
-        
+        #req(input$json_auth, input$data_file, input$sheet_key)
         p =  ggplot(data(), aes(X, Y, fill= done, text = row_id)) + 
             geom_tile(color = 'black') +
             theme_void() + theme(legend.position = 'bottom') + 
@@ -234,6 +235,9 @@ server <- function(input, output, session) {
     # Print the first 100 characters of a row underneath the progress grid, when hovered over.
     
     output$vals <- renderPrint({
+        
+       # req(input$json_auth, input$data_file, input$sheet_key)
+        
         hover <- input$hover 
         y <- nearPoints(data(), input$hover, maxpoints = 1) %>% pull(row_id)
         z = data_to_label() %>% slice(y) %>% pull(abstract)  %>% substr(1,100)

@@ -1,10 +1,10 @@
 # Annotator
 
-Originally custom-built to annotate letters as part of my Folger Fellowship, I realised it might be useful as a lightweight general annotator for data, for example for machine learning labelling. I like using Google sheets because it records every change made in its history, plus multiple people can work on the same document. You can also manually make changes to the data - the annotator doesn't care. It has a graphic display telling you how many rows of data are labelled and yet to be labelled.
+Originally custom-built to annotate letters as part of my Folger Fellowship, I realised it might be useful as a lightweight general annotator for data, for example for machine learning labelling. I like using Google sheets for a few reasons: it records every change made in its history, and multiple people can work on the same document. Probably most importantly, it's a way of recording persistent data without having to learn how to install or use database software, which often requires a paid-for server. You can also manually make changes to the data - the annotator doesn't care. It has a graphic display telling you how many rows of data are labelled and yet to be labelled.
 
 It's also open source, and you can download and edit the source code as much as you like, adding in different buttons or notes fields, and so forth.
 
-While a demo is available here, I advise building your own version by cloning this repository and opening with R-Studio.
+While a demo is available [here](https://yannryan.shinyapps.io/annotator/), I advise building your own version by cloning this repository and opening with R-Studio.
 
 It needs an input csv with two columns: a unique key for each row, and the text for the thing to be labelled. This can contain HTML.
 
@@ -52,7 +52,7 @@ When you first open the annotator, you'll see a lot of red error text. This is b
 
 #### Getting an API key from Google
 
-The trickiest bit now is authorising your copy of the application to read and write from a Google sheet on your account. For this you'll need a Google Cloud Platform account and a service account token, in the form of a json file.
+The trickiest bit is authorising your copy of the application to read and write from a Google sheet on your account. For this you'll need a Google Cloud Platform account and a service account token, in the form of a json file.
 
 There are very good instructions on how to do this here: <https://gargle.r-lib.org/articles/get-api-credentials.html>
 
